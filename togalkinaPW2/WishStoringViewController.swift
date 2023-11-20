@@ -8,10 +8,15 @@
 import Foundation
 import UIKit
 
-final class WishStoringViewController: UIViewController {
+final class WishStoringViewController: UIViewController, UITableViewDelegate {
     override func viewDidLoad() {
         view.backgroundColor = .textBlue
         configureTable()
+        
+        if let savedWishes = defaults.stringArray(forKey: Constants.wishesKey) {
+            wishArray = savedWishes
+            table.reloadData()
+        }
     }
     
     enum Constants {
@@ -21,11 +26,7 @@ final class WishStoringViewController: UIViewController {
         
         static let wishesKey: String = "WishArray"
         
-        static let addWishSection: Int = 0
         static let writtenWishesSection: Int = 1
-        
-        static let countOfWrittenWishes: Int = 1
-        static let defaultRowsColors: Int = 0
     }
     
     private let table: UITableView = UITableView(frame: .zero)
@@ -37,6 +38,7 @@ final class WishStoringViewController: UIViewController {
         table.backgroundColor = .slayPink
         table.dataSource = self
         table.separatorStyle = .none
+        table.delegate = self
         table.layer.cornerRadius = Constants.tableCornerRadius
         table.pin(to: view, Constants.tableOffset)
         table.register(NewWishCell.self, forCellReuseIdentifier: NewWishCell.reuseId)
@@ -71,25 +73,15 @@ extension WishStoringViewController: UITableViewDataSource {
         } else if indexPath.section == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: NewWishCell.reuseId, for: indexPath)
             
-            guard let newAddCell = cell as? NewWishCell else {return cell}
+            guard let newWishCell = cell as? NewWishCell else {return cell}
             
-//            if let editingIndex = editingWishIndex {
-//                newAddCell.addedText.text = wishArray[editingIndex]
-//            }
             
-            newAddCell.addWish = { [weak self] value in
-//                if let editingIndex = self?.editingWishIndex {
-//                    self?.wishArray[editingIndex] = value
-//                    self?.editingWishIndex = nil
-//                } else {
-//                    self?.wishArray.append(value)
-//                }
+            newWishCell.addWish = { [weak self] value in
                 self?.wishArray.append(value)
                 self?.table.reloadData()
                 self?.defaults.set(self?.wishArray, forKey: Constants.wishesKey)
             }
-            
-            return newAddCell
+            return newWishCell
         } else {
             return UITableViewCell()
         }
@@ -100,6 +92,41 @@ extension WishStoringViewController: UITableViewDataSource {
         return Constants.numberOfSections
     }
     
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            wishArray.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            defaults.set(wishArray, forKey: Constants.wishesKey)
+        }
+    }
     
+    func editCell(at indexPath: IndexPath, with newWish: String) {
+        wishArray[indexPath.row] = newWish
+        table.reloadRows(at: [indexPath], with: .automatic)
+        defaults.set(wishArray, forKey: Constants.wishesKey)
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        if indexPath.section == Constants.writtenWishesSection {
+            let currentWish = wishArray[indexPath.row]
+            
+            let alertController = UIAlertController(title: "Edit you wish:)", message: nil, preferredStyle: .alert)
+            alertController.addTextField { textField in
+                textField.text = currentWish
+            }
+            
+            let saveAction = UIAlertAction(title: "Save", style: .default) { [weak self] _ in
+                guard let textField = alertController.textFields?.first, let newWish = textField.text else { return }
+                self?.editCell(at: indexPath, with: newWish)
+            }
+            alertController.addAction(saveAction)
+            
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            
+            present(alertController, animated: true, completion: nil)
+        }
+    }
 }
 

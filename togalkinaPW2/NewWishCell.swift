@@ -15,14 +15,21 @@ final class NewWishCell: UITableViewCell, UITextViewDelegate {
         static let wrapRadius: CGFloat = 16
         static let wrapOffsetV: CGFloat = 5
         static let wrapOffsetH: CGFloat = 10
-        static let wishLabelOffset: CGFloat = 8
+        static let wrapHeight: CGFloat = 30
         
         static let buttonRadius: CGFloat = 15
-        static let buttonHeight:CGFloat = 30
-        static let buttonSide:CGFloat = 20
-        static let buttonBottom:CGFloat = 50
+        static let buttonOffsetV:CGFloat = 5
+        static let buttonOffsetR:CGFloat = 5
+        static let buttonWidth:CGFloat = 50
+        static let buttonColor: UIColor = .textBlue
+        static let buttonBackgroundColor: UIColor = .textBlue
         
         static let textRadius: CGFloat = 15
+        static let textOffsetV:CGFloat = 5
+        static let textOffsetR:CGFloat = 5
+        static let textOffsetL:CGFloat = 1
+        static let textColor: UIColor = .textBlue
+        static let textBackgroundColor: UIColor = .lightText
     }
     
     let wishText: UITextView = UITextView()
@@ -46,29 +53,30 @@ final class NewWishCell: UITableViewCell, UITextViewDelegate {
         selectionStyle = .none
         backgroundColor = .clear
         let wrap: UIView = UIView()
-        addSubview(wrap)
+        contentView.addSubview(wrap)
         
         wrap.backgroundColor = Constants.wrapColor
         wrap.layer.cornerRadius = Constants.wrapRadius
         wrap.pinVertical(to: self, Constants.wrapOffsetV)
         wrap.pinHorizontal(to: self, Constants.wrapOffsetH)
+        wrap.setHeight(Constants.wrapHeight)
+        
         configureUIButton(wrap: wrap)
-        //configureUITextView(wrap: wrap)
+        configureUITextView(wrap: wrap)
     }
     
     func configureUIButton(wrap: UIView) {
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         wrap.addSubview(plusButton)
-        plusButton.backgroundColor = .white
-        plusButton.setTitleColor(.textBlue, for: .normal)
-        plusButton.setTitle("lalala", for: .normal)
-        plusButton.layer.cornerRadius = Constants.buttonRadius
         
-        plusButton.setHeight(Constants.buttonHeight)
-        //plusButton.pinHorizontal(to: wrap, Constants.buttonSide)
-        plusButton.pinVertical(to: wrap, 20)
-        plusButton.pinRight(to: wrap.trailingAnchor, 20)
-
+        plusButton.backgroundColor = Constants.textBackgroundColor
+        plusButton.setTitleColor(Constants.textColor, for: .normal)
+        plusButton.setTitle("+", for: .normal)
+        
+        plusButton.layer.cornerRadius = Constants.buttonRadius
+        plusButton.pinVertical(to: wrap, Constants.buttonOffsetV)
+        plusButton.pinRight(to: wrap.trailingAnchor, Constants.buttonOffsetR)
+        plusButton.setWidth(Constants.buttonWidth)
         
         plusButton.isHidden = false
         plusButton.isEnabled = true
@@ -77,27 +85,23 @@ final class NewWishCell: UITableViewCell, UITextViewDelegate {
     
     @objc
     private func addNewButtonTouched(_ sender:UIButton) {
-//        if (wishText.hasText) {
-//            addWish?(wishText.text)
-//            wishText.text = ""
-//        }
-        if let addWish = addWish {
-            addWish(wishText.text)
+        if (wishText.hasText) {
+            addWish?(wishText.text)
             wishText.text = ""
         }
-        print("zalupa")
     }
     
     func configureUITextView(wrap: UIView) {
         wishText.translatesAutoresizingMaskIntoConstraints = false;
         wrap.addSubview(wishText)
-        wishText.backgroundColor = .white
-        wishText.textColor = .black
+        wishText.backgroundColor = Constants.textBackgroundColor
+        wishText.textColor = Constants.textColor
+        
         wishText.layer.cornerRadius = Constants.textRadius
-        wishText.text = "lupazalupa"
-        wishText.pinRight(to: plusButton.leadingAnchor, 20)
-        wishText.pinLeft(to: wrap.leadingAnchor, 20)
-        wishText.pinVertical(to: wrap, 20)
+        wishText.pinRight(to: plusButton.leadingAnchor, Constants.textOffsetR)
+        wishText.pinLeft(to: wrap.leadingAnchor, Constants.textOffsetL)
+        wishText.pinVertical(to: wrap, Constants.textOffsetV)
+        
         wishText.delegate = self
         wishText.isEditable = true
     }

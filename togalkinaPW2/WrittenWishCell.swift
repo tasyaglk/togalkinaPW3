@@ -16,9 +16,13 @@ final class WrittenWishCell: UITableViewCell {
         static let wrapRadius: CGFloat = 16
         static let wrapOffsetV: CGFloat = 5
         static let wrapOffsetH: CGFloat = 10
+        
         static let wishLabelOffset: CGFloat = 8
+        static let wishTextColor: UIColor = .textBlue
+
     }
     private let wishLabel: UILabel = UILabel()
+    var onCellTapped: ((String) -> Void)?
     
     // MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -34,6 +38,7 @@ final class WrittenWishCell: UITableViewCell {
     
     func configure(with wish: String) {
         wishLabel.text = wish
+        wishLabel.textColor = Constants.wishTextColor
     }
     
     private func configureUI() {
